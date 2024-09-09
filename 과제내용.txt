@@ -1,0 +1,10 @@
+1. audio 태그 사용 음악플레이어 만들기
+   https://www.w3schools.com/tags/ref_av_dom.asp
+2. 음악파일의 정보는 Javascript ID3 Reader 사용하여 불러오기 (title, artist, cover image)
+   https://github.com/aadsm/JavaScript-ID3-Reader
+3. 버튼 하나로 재생, 정지 모두 가능하게
+4. 현재 재생시간, 전체 재생시간 나타내기
+5. 재생바 클릭하면 해당 위치로 이동, 드래그도 가능하게 (input type="range" 사용)
+
+추가
+음소거, 볼륨조절 넣기

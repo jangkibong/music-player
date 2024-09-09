@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MUSIC</title>
+<style>
+    audio{
+        position: absolute;
+        left: -9999px;
+    }
+</style>
+</head>
+<body>
+<div class="music-player">
+    <audio id="player" preload="metadata" controls>
+        <source src="/Maroon 5 - Memories.mp3">
+    </audio>
+    <div class="album-art">
+        <img src="" alt="앨범아트">
+    </div>
+    <div class="music-info">
+        <h4 class="title">
+            Title
+        </h4>
+        <p class="artist">
+            Name
+        </p>
+    </div>
+    <div class="box-controll">
+        <div class="box-timebar">
+            <input class="time-bar" type="range" min="0" max="1" step="0.01">
+            <span class="current-time">00:00</span> <span class="duration-time">00:00</span>
+        </div>
+        <button type="button" class="btn-play paused">play</button>
+        <button type="button" class="btn-stop">stop</button>
+        <div class="box-volume">
+            <button type="button" class="btn-mute">mute</button>
+            <input class="volume-bar" type="range" min="0" max="1" step="0.01"  value="0.3">
+        </div>
+    </div>
+</div>
+<script src="/js/id3-minimized.js"></script>
+<script>
+    const player = document.querySelector('#player');
+    const title_name = document.querySelector('.title');
+    const artist_name = document.querySelector('.artist');
+    const player_source = player.querySelector('source').src;
+    const album_art = document.querySelector('.album-art img');
+    const duration_time = document.querySelector('.duration-time');
+    const current_time = document.querySelector('.current-time');
+    const time_bar = document.querySelector('.time-bar')
+    const btn_stop = document.querySelector('.btn-stop');
+    const btn_play = document.querySelector('.btn-play');
+    const btn_mute = document.querySelector('.btn-mute');
+    const volume_bar = document.querySelector('.volume-bar');
+    
+    let sec = Number();
+    let min = Number();
+
+
+    /* id3 reader */
+
+    ID3.loadTags(player_source, function() { // 선택된 파일의 태그 로드
+        const tags = ID3.getAllTags(player_source);
+        showTags(tags); // 태그를 표시하는 함수 호출
+    }, {
+        tags: ["title","artist","album","picture"], // 로드할 태그 목록
+    });
+
+    function showTags(tags) {
+        // title, artist, picture 정보 추출
+        const title = tags.title || '정보 없음';
+        const artist = tags.artist || '정보 없음';
+        var image = tags.picture;
+
+        title_name.innerHTML= title;
+        artist_name.innerHTML= artist;
+
+        // 앨범 아트 표시
+        if (image) { // 이미지가 존재하는 경우
+            var base64String = ""; // base64 문자열 초기화
+            for (var i = 0; i < image.data.length; i++) { // 이미지 데이터를 base64 문자열로 변환
+                base64String += String.fromCharCode(image.data[i]);
+            }
+            var base64 = "data:" + image.format + ";base64," + // base64 데이터 URL 생성
+                    window.btoa(base64String); // base64 인코딩
+            album_art.setAttribute('src',base64); // 이미지 소스 설정
+        } else { // 이미지가 없을 경우
+            album_art.style.display = "none"; // 이미지 영역 숨기기
+        }
+    }   
+
+
+    /* 음악 재생시간 세팅 */
+    player.addEventListener('loadedmetadata', () => {
+        sec = Math.floor(player.duration);
+        min = Math.floor(sec / 60);
+        min = min >= 10 ? min : '0' + min; 
+        sec = Math.floor(sec % 60);
+        sec = sec >= 10 ? sec : '0' + sec;
+
+
+        time_bar.max = player.duration;
+        duration_time.innerHTML = min + ":" + sec;
+    });
+
+    /* 음악 재생중 재생현황 세팅 */
+    player.addEventListener('timeupdate', () => {
+        sec = Math.floor(player.currentTime);
+        min = Math.floor(sec / 60);
+        min = min >= 10 ? min : '0' + min; 
+        sec = Math.floor(sec % 60);
+        sec = sec >= 10 ? sec : '0' + sec;
+
+        time_bar.value = Math.floor(player.currentTime);
+        current_time.innerHTML = min + ':' + sec;
+    });
+
+    /* 재생바 조작 세팅 */
+    time_bar.addEventListener('input', () => {
+        player.currentTime = time_bar.value;
+    });
+
+
+
+    /* 정지 버튼*/
+    btn_stop.addEventListener('click', () => {
+        player.pause();
+        player.currentTime = 0;
+        })
+        
+    /* 재생 버튼*/
+    btn_play.addEventListener('click', () => {
+        btn_play.classList.toggle('paused');
+        if(player.paused){
+            player.play();
+            btn_play.innerHTML = 'pause';
+            } else{
+            player.pause();
+            btn_play.innerHTML = 'play';
+        }
+    });
+
+    /* 볼륨조정 */
+    btn_mute.addEventListener('click', () =>{
+        if(player.muted){
+            player.muted = false;
+            btn_mute.innerHTML = "mute on";
+        } else{
+            player.muted = true;
+            btn_mute.innerHTML = "mute off";
+        }
+    });
+
+    player.volume = volume_bar.value;
+
+    volume_bar.addEventListener('input', () => {
+        player.volume = volume_bar.value;
+    });
+
+
+
+</script>
+</body>
+</html>
